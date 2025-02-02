@@ -23,4 +23,8 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".github\workflows\build-release.yml" />
+    </ItemGroup>
+
 </Project>
