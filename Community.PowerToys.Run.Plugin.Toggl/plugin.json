@@ -1,0 +1,14 @@
+{
+  "ID": "ABDA11571F3D40A58F187F038F62DBEA",
+  "ActionKeyword": "tg",
+  "IsGlobal": false,
+  "Name": "Toggl",
+  "Author": "polakv93",
+  "Version": "0.88.0",
+  "Language": "csharp",
+  "Website": "https://github.com/polakv93/PowerToysRun-Toggl",
+  "ExecuteFileName": "Community.PowerToys.Run.Plugin.Toggl.dll",
+  "IcoPathDark": "Images\\toggl.dark.png",
+  "IcoPathLight": "Images\\toggl.light.png",
+  "DynamicLoading": true
+}
