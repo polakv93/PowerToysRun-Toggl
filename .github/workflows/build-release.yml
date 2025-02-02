@@ -1,0 +1,33 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: [ "v*.*.*" ] 
+
+jobs:
+  build_release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Build and publish
+      run: dotnet publish .\Community.PowerToys.Run.Plugin.Toggl\Community.PowerToys.Run.Plugin.Toggl.csproj -o publish/Toggl --configuration Release
+
+    - name: Create ZIP
+      run: Compress-Archive -Path "publish/Toggl" -DestinationPath "Toggl.zip"
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        draft: false
+        prerelease: false
+        files: Toggl.zip
+        token: ${{ secrets.GITHUB_TOKEN }}

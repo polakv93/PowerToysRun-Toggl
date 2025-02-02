@@ -21,7 +21,9 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
 
     private PluginInitContext Context { get; set; }
 
-    private string IconPath { get; set; }
+    private string _offIconPath;
+    private string _workingIconPath;
+    private string _startNewIconPath;
 
     private bool Disposed { get; set; }
 
@@ -125,7 +127,7 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
             new Result
             {
                 QueryTextDisplay = search,
-                IcoPath = IconPath,
+                IcoPath = _startNewIconPath,
                 Title = "Start: " + search,
                 SubTitle = "Select to start",
                 ToolTipData = new ToolTipData("Title", "Text"),
@@ -144,11 +146,11 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
         var currentEntry = _togglClient.GetCurrentEntry();
         if (currentEntry is not null)
         {
-            var duration = DateTime.UtcNow - currentEntry.StartsAt;
+            var duration = DateTime.Now - currentEntry.StartsAt;
             var humanReadableDuration = duration.Humanize(2);
             results.Add(new Result
             {
-                IcoPath = IconPath,
+                IcoPath = _workingIconPath,
                 Title = $"{currentEntry.Title}",
                 SubTitle = $"Currently running for {humanReadableDuration}",
                 Action = _ => false, //todo stop on click ?
@@ -162,7 +164,7 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
         {
             results.Add(new Result
             {
-                IcoPath = IconPath,
+                IcoPath = _offIconPath,
                 Title = "There is no toggl running right now."
             });
         }
@@ -183,10 +185,13 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
 
     private void UpdateIconPath(Theme theme)
     {
-        IconPath = theme == Theme.Light || theme == Theme.HighContrastWhite
-            ? "Images/toggl.light.png"
-            : "Images/toggl.dark.png";
+        var variant = theme is Theme.Light or Theme.HighContrastWhite ? "light" : "dark";
+        
+        _startNewIconPath = $"Images/hourglass-high.{variant}.png";
+        _workingIconPath = $"Images/hourglass.{variant}.png";
+        _offIconPath = $"Images/hourglass-off.{variant}.png";
     }
+
 
     private void OnThemeChanged(Theme currentTheme, Theme newTheme)
     {
