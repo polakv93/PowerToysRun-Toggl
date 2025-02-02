@@ -1,0 +1,36 @@
+﻿### 
+GET https://api.track.toggl.com/api/v9/me
+Authorization: {{AuthKey}}
+   
+###
+GET https://api.track.toggl.com/api/v9/me/time_entries?start_date=2024-12-12&end_date=2025-01-12
+Authorization: {{AuthKey}}
+Content-Type: application/json
+
+###
+GET https://api.track.toggl.com/api/v9/me/organizations
+Authorization: {{AuthKey}}
+Content-Type: application/json
+
+###
+GET https://api.track.toggl.com/api/v9/me/workspaces
+Authorization: {{AuthKey}}
+Content-Type: application/json
+
+###
+GET https://api.track.toggl.com/api/v9/me/time_entries/current
+Authorization: {{AuthKey}}
+Content-Type: application/json
+
+###
+POST https://api.track.toggl.com/api/v9/workspaces/{{WorkspaceId}}/time_entries
+Authorization: {{AuthKey}}
+Content-Type: application/json
+
+{
+  "created_with": "test_created_with",
+  "workspace_id": {{WorkspaceId}},
+  "description": "test",
+  "duration": -1,
+  "start": "2025-02-01T21:55:30.330Z"
+}
