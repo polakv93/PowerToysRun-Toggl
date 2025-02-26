@@ -130,7 +130,6 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
                 IcoPath = _startNewIconPath,
                 Title = "Start: " + search,
                 SubTitle = "Select to start",
-                ToolTipData = new ToolTipData("Title", "Text"),
                 Action = _ =>
                 {
                     _togglClient.Start(search);
@@ -152,11 +151,12 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
             {
                 IcoPath = _workingIconPath,
                 Title = $"{currentEntry.Title}",
-                SubTitle = $"Currently running for {humanReadableDuration}",
-                Action = _ => false, //todo stop on click ?
-                Metadata = new PluginMetadata
+                SubTitle = $"Currently running for {humanReadableDuration}, enter to stop",
+                Action = _ =>
                 {
-                    Disabled = true
+                    _togglClient.Stop(currentEntry);
+                    Context.API.ShowNotification($"Stopped {currentEntry.Title}");
+                    return true;
                 }
             });
         }

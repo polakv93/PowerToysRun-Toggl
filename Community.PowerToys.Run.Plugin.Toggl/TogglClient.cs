@@ -28,12 +28,27 @@ public class TogglClient
             start = DateTime.UtcNow
         });
     }
+    
+    public void Stop(CurrentEntry currentEntry)
+    {
+        var workspaceId = GetWorkspaceId();
+        Patch($"/workspaces/{workspaceId}/time_entries/{currentEntry.Id}/stop");
+    }
 
     private void Post(string endpoint, object body)
     {
         $"{BaseUrl}{endpoint}"
             .WithBasicAuth(_togglApiKey, "api_token")
             .PostJsonAsync(body)
+            .AsSync();
+    }
+    
+    
+    private void Patch(string endpoint)
+    {
+        $"{BaseUrl}{endpoint}"
+            .WithBasicAuth(_togglApiKey, "api_token")
+            .PatchAsync()
             .AsSync();
     }
 
@@ -68,6 +83,7 @@ public class TogglClient
 
         return new CurrentEntry
         {
+            Id = entry.id,
             Title = entry.description,
             StartsAt = entry.start
         };
@@ -112,6 +128,7 @@ public class TogglClient
 
 public record CurrentEntry
 {
+    public required long Id { get; init; }
     public required string Title { get; init; }
     public required DateTime StartsAt { get; init; }
 }
