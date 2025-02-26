@@ -29,7 +29,21 @@ public class TogglClient
         });
     }
     
-    public void Stop(CurrentEntry currentEntry)
+    public void Start(Entry entry)
+    {
+        var workspaceId = GetWorkspaceId();
+        Post($"/workspaces/{workspaceId}/time_entries", new TogglStart
+        {
+            created_with = "PowerToysRun-Toggl",
+            workspace_id = workspaceId,
+            description = entry.Title,
+            duration = -1,
+            start = DateTime.UtcNow,
+            project_id = entry.ProjectId
+        });
+    }
+    
+    public void Stop(Entry currentEntry)
     {
         var workspaceId = GetWorkspaceId();
         Patch($"/workspaces/{workspaceId}/time_entries/{currentEntry.Id}/stop");
@@ -74,19 +88,21 @@ public class TogglClient
         return _workspaceId.Value;
     }
 
-    //todo cache?
-    public CurrentEntry GetCurrentEntry()
-    {
-        var entry = Get<TogglCurrentEntry>("/me/time_entries/current");
-        if (entry is null)
-            return null;
-
-        return new CurrentEntry
+    private static Entry MapToEntry(TogglEntry entry) =>
+        new()
         {
             Id = entry.id,
             Title = entry.description,
-            StartsAt = entry.start
+            StartsAt = entry.start,
+            StopAt = entry.stop,
+            ProjectId = entry.project_id
         };
+
+    public Entry[] GetEntries()
+    {
+        return Get<TogglEntry[]>("/me/time_entries")
+            .Select(MapToEntry)
+            .ToArray();
     }
 
     private record TogglWorkspace
@@ -102,9 +118,10 @@ public class TogglClient
         public long workspace_id { get; init; }
         public int duration { get; init; }
         public DateTime start { get; init; }
+        public long? project_id { get; set; }
     }
 
-    private record TogglCurrentEntry
+    private record TogglEntry
     {
         public long id { get; init; }
         public long workspace_id { get; init; }
@@ -124,11 +141,14 @@ public class TogglClient
         public long uid { get; init; }
         public long wid { get; init; }
     }
+
 }
 
-public record CurrentEntry
+public record Entry
 {
     public required long Id { get; init; }
     public required string Title { get; init; }
     public required DateTime StartsAt { get; init; }
+    public required DateTime? StopAt { get; init; }
+    public required long? ProjectId { get; init; }
 }

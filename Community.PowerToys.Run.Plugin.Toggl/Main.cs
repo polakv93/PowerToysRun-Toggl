@@ -80,11 +80,51 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
         if (!string.IsNullOrWhiteSpace(search))
             AddStartNewEntry(results, search);
         
-        AddCurrentEntry(results);
-
-        //todo historical entries that can be filtered /searched restarted
+        AddEntries(results, search);
 
         return results;
+    }
+
+    private void AddEntries(List<Result> results, string search)
+    {
+        var isAnySearchPhrase = !string.IsNullOrWhiteSpace(search);
+        var entires = _togglClient.GetEntries();
+        foreach (var entry in entires)
+        {
+            if (entry.StopAt.HasValue is false)
+            {
+                results.Add(new Result
+                {
+                    IcoPath = _workingIconPath,
+                    Title = $"{entry.Title}",
+                    SubTitle = $"Currently running for {(DateTime.Now - entry.StartsAt).Humanize(2)}, enter to stop",
+                    Action = _ =>
+                    {
+                        _togglClient.Stop(entry);
+                        Context.API.ShowNotification($"Stopped {entry.Title}");
+                        return true;
+                    }
+                });
+                continue;
+            }
+
+            if (!isAnySearchPhrase || entry.Title.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+            {
+                results.Add(new Result
+                {
+                    IcoPath = _workingIconPath,
+                    Title = $"{entry.Title} - {(entry.StopAt.Value - entry.StartsAt).Humanize(2)}",
+                    SubTitle = "Enter to start again",
+                    QueryTextDisplay = entry.Title,
+                    Action = _ =>
+                    {
+                        _togglClient.Start(entry);
+                        Context.API.ShowNotification($"Started {entry.Title}");
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
     /// <summary>
@@ -138,36 +178,6 @@ public class Main : IPlugin, IContextMenu, IDisposable, ISettingProvider
                 },
                 ContextData = search
             });
-    }
-
-    private void AddCurrentEntry(List<Result> results)
-    {
-        var currentEntry = _togglClient.GetCurrentEntry();
-        if (currentEntry is not null)
-        {
-            var duration = DateTime.Now - currentEntry.StartsAt;
-            var humanReadableDuration = duration.Humanize(2);
-            results.Add(new Result
-            {
-                IcoPath = _workingIconPath,
-                Title = $"{currentEntry.Title}",
-                SubTitle = $"Currently running for {humanReadableDuration}, enter to stop",
-                Action = _ =>
-                {
-                    _togglClient.Stop(currentEntry);
-                    Context.API.ShowNotification($"Stopped {currentEntry.Title}");
-                    return true;
-                }
-            });
-        }
-        else
-        {
-            results.Add(new Result
-            {
-                IcoPath = _offIconPath,
-                Title = "There is no toggl running right now."
-            });
-        }
     }
 
     /// <summary>

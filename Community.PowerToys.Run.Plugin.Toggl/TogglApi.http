@@ -23,6 +23,11 @@ Authorization: {{AuthKey}}
 Content-Type: application/json
 
 ###
+GET https://api.track.toggl.com/api/v9/me/time_entries
+Authorization: {{AuthKey}}
+Content-Type: application/json
+
+###
 POST https://api.track.toggl.com/api/v9/workspaces/{{WorkspaceId}}/time_entries
 Authorization: {{AuthKey}}
 Content-Type: application/json
